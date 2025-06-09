@@ -34,7 +34,7 @@ int main(){
 
     AP::whisper_params params;
     whisper_context *ctx = whisper_init_from_file_with_params(params.model.c_str(), cparams);
-    wparams.print_progress   = true;
+    wparams.print_progress   = false;
     wparams.print_special    = params.print_special;
     wparams.print_realtime   = false;
     wparams.print_timestamps = !params.no_timestamps;
