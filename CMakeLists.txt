@@ -5,10 +5,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(FetchContent)
 
-set(IMGUI_DIR ~/dev/libs/imgui/)
 set(WHISPER_DIR ~/dev/libs/whisper.cpp)
 
-include_directories(${IMGUI_DIR} ${IMGUI_DIR}/backends ${WHISPER_DIR} ..)
 
 
 # set the output directory for built objects.
@@ -36,11 +34,6 @@ add_executable(archie
     AudioProcessor.cpp CommandProcessor.cpp
     grammar-parser.cpp common.cpp 
     ${WHISPER_DIR}/src/whisper.cpp 
-    ${IMGUI_DIR}/imgui.cpp 
-    ${IMGUI_DIR}/imgui_draw.cpp 
-    ${IMGUI_DIR}/imgui_demo.cpp 
-    ${IMGUI_DIR}/imgui_tables.cpp 
-    ${IMGUI_DIR}/imgui_widgets.cpp
 )
 
 # target_include_directories(archie PRIVATE ${WHISPER_DIR}/include)
