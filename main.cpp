@@ -6,7 +6,7 @@
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_scancode.h"
-#include "archie/CommandProcessor.h"
+#include "CommandProcessor.h"
 #include "whisper.h"
 #include "SDL3/SDL_audio.h"
 
