@@ -1,5 +1,6 @@
 #include "CommandProcessor.h"
 #include <cassert>
+#include <cctype>
 #include <cstdio>
 
 
@@ -23,6 +24,17 @@ void Command::searchFirefox(std::vector<std::string> args){
     query = "firefox --new-window " + query;
     system(query.c_str());
 }
+
+void Command::calculate(std::vector<std::string> args){
+    //need to split the args if it gets parsed as one thing
+    for(int i = 0; i < args[0].length(); i++){
+        std::string first = args[0];
+        if(std::isdigit(first[i])){
+
+        }
+    }
+}
+
 void Command::parseCommand(std::vector<std::string> tokens){
     // for(auto tok : tokens){
     //     printf("%s\n", tok.c_str());
@@ -45,16 +57,16 @@ void Command::parseCommand(std::vector<std::string> tokens){
     }
     assert(cmdIndex < commandsLength);
     switch(cmdIndex){
-        case 0:
+        case 0: // calculate
             //parse the rest of the string
+
             break;
-        case 1:
+        case 1: // search
             if(args.size() < 1){
                 printf("You need to search something");
             }
             assert(args.size() >= 1);
             searchFirefox(args);
-            // system("firefox --new-window https://www.google.com/search?q=");
             break;
         case 2:
             break;

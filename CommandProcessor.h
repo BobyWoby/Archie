@@ -17,6 +17,7 @@ namespace cmd {
         public:
 
         static void searchFirefox(std::vector<std::string> args);
+        static void calculate(std::vector<std::string> args);
         static void parseCommand(std::vector<std::string> tokens);
     };
 }

@@ -7,10 +7,42 @@
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_scancode.h"
 #include "CommandProcessor.h"
+#include "common.h"
 #include "whisper.h"
 #include "SDL3/SDL_audio.h"
 
 
+bool processAudio(AP::Audio &audio, whisper_context *ctx, whisper_full_params wparams){
+
+    std::vector<float> audioBuffer;
+    std::vector<std::string> tokens;
+    audio.get(20000, audioBuffer);
+    whisper_full(ctx, wparams, audioBuffer.data(), audioBuffer.size());
+    std::string result;
+
+    const int n_segments = whisper_full_n_segments(ctx);
+    for (int i = 0; i < n_segments; ++i) {
+        const char * text = whisper_full_get_segment_text(ctx, i);
+        result += text;
+    }
+    std::cout << result << std::endl;
+    //split the result into words here, then process them into commands
+    tokens = AP::split(result, " ");
+    tokens.erase(tokens.begin());
+    for(int i = 0; i < tokens.size(); i++){
+        std::string cleanedStr;
+        for(int j = 0; j < tokens.at(i).length(); j++){
+            auto c = tokens.at(i)[j];
+            if(std::isalnum(c) || (c == '.' && j < tokens.at(i).length() - 1)) cleanedStr += std::tolower(c);
+        }
+        //makes removes all non-alphanumeric characters from the string
+        tokens[i] = cleanedStr;
+        //Do something with the cleaned string, like process the command or smt
+        cmd::Command::parseCommand(tokens);
+        return true;
+    }
+    return false;
+}
 
 int main(){
     SDL_Window *window;
@@ -20,7 +52,7 @@ int main(){
 
     bool running = true;
     const int lenMS = 30 * 1000; // Record for 30 seconds maximum
-    
+
     SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO);
     AP::Audio audio;
 
@@ -85,34 +117,12 @@ int main(){
                         // play audio
                         SDL_PauseAudioStreamDevice(audio.inStream);
                         SDL_FlushAudioStream(audio.inStream);
-                        audio.get(20000, audioBuffer);
-                        whisper_full(ctx, wparams, audioBuffer.data(), audioBuffer.size());
-                        std::string result;
 
-                        const int n_segments = whisper_full_n_segments(ctx);
-                        for (int i = 0; i < n_segments; ++i) {
-                            const char * text = whisper_full_get_segment_text(ctx, i);
-                            result += text;
-                       }
-                        std::cout << result << std::endl;
-                        //split the result into words here, then process them into commands
-                        tokens = AP::split(result, " ");
-                        tokens.erase(tokens.begin());
-                        for(int i = 0; i < tokens.size(); i++){
-                            std::string cleanedStr;
-                            for(int j = 0; j < tokens.at(i).length(); j++){
-                                auto c = tokens.at(i)[j];
-                                if(std::isalnum(c) || (c == '.' && j < tokens.at(i).length() - 1)) cleanedStr += std::tolower(c);
-
-                            }
-                            //makes removes all non-alphanumeric characters from the string
-                            tokens[i] = cleanedStr;
-                            //Do something with the cleaned string, like process the command or smt
+                        if(processAudio(audio, ctx, wparams)){
+                            running = false;
+                            whisper_free(ctx);
+                            return 0;
                         }
-                        cmd::Command::parseCommand(tokens);
-                        running = false;
-                        whisper_free(ctx);
-                        return 0;
                         // SDL_ResumeAudioStreamDevice(audio.outStream);
                     }
                     break;
@@ -122,7 +132,14 @@ int main(){
         SDL_RenderClear(renderer);
         SDL_RenderPresent(renderer);
         //do smt with the buffer that was read to
-        
+        audio.get(2000, audioBuffer);
+        if(vad_simple(audioBuffer, WHISPER_SAMPLE_RATE, 1000, params.vad_thold, params.freq_thold, false)){
+            if(processAudio(audio, ctx, wparams)){
+                running = false;
+                whisper_free(ctx);
+                return 0;
+            }
+        }
     }
 
 
