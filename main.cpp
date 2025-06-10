@@ -33,15 +33,19 @@ bool processAudio(AP::Audio &audio, whisper_context *ctx, whisper_full_params wp
         std::string cleanedStr;
         for(int j = 0; j < tokens.at(i).length(); j++){
             auto c = tokens.at(i)[j];
-            if(std::isalnum(c) || (c == '.' && j < tokens.at(i).length() - 1)) cleanedStr += std::tolower(c);
+            if((c != '.' && c != '?' && c != ',') || 
+                    (c == '.' && j < tokens.at(i).length() - 2)
+              ) 
+            {
+                cleanedStr += std::tolower(c);
+            }
         }
         //makes removes all non-alphanumeric characters from the string
         tokens[i] = cleanedStr;
         //Do something with the cleaned string, like process the command or smt
-        cmd::Command::parseCommand(tokens);
-        return true;
     }
-    return false;
+    cmd::Command::parseCommand(tokens);
+    return true;
 }
 
 int main(){
